@@ -197,16 +197,23 @@
     <ul>
       {#each participantVideoTracks as participant}
         <li>{participant.identity}</li>
+        <video bind:this={participant.videoElement} autoplay
+          ><track kind="captions" /></video
+        >
       {/each}
     </ul>
   </div>
 </main>
 
 <style>
+  #videoContainer {
+    width: 80vw;
+    margin: auto;
+  }
   .video-participant {
     display: flex;
     flex: 1 0 auto;
-    width: 100vw;
+    width: 50vw;
     aspect-ratio: 4/3;
   }
   .participant {
