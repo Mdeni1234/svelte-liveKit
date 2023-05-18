@@ -70,7 +70,11 @@
     await room.localParticipant.enableCameraAndMicrophone();
     room
       .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
-      .on(RoomEvent.TrackPublished, handleTrackPublished);
+      .on(RoomEvent.TrackPublished, handleTrackPublished)
+      .on(RoomEvent.ParticipantConnected, (participant) => {
+        console.log(`Participant connected: ${participant.identity}`);
+        // Lakukan tindakan yang diinginkan setelah bergabung ke room
+      });
     // room.on(RoomEvent.ParticipantConnected, (participant) => {
     //   console.log("participant connected");
     //   participant.videoTracks.forEach((publication) => {
