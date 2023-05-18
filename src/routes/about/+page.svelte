@@ -27,7 +27,7 @@
 
     dynacast: true,
     videoCaptureDefaults: {
-      resolution: VideoPresets.h720.resolution,
+      resolution: VideoPresets.h180.resolution,
     },
   });
   /**
@@ -37,14 +37,6 @@
   let localVideoTrack;
 
   /**
-   * @type {LocalParticipant | any}
-   */
-  let localParticipant;
-  /**
-   * @type {RemoteParticipant[] | any[]}
-   */
-  let participantVideoTracks = [];
-  /**
    * @type {HTMLVideoElement}
    */
   let participantElement;
@@ -52,7 +44,13 @@
    * @type {number}
    */
   let roomSize = 0;
-
+  room
+    .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
+    .on(RoomEvent.TrackPublished, handleTrackPublished)
+    .on(RoomEvent.ParticipantConnected, (participant) => {
+      console.log(`Participant connected: ${participant.identity}`);
+      // Lakukan tindakan yang diinginkan setelah bergabung ke room
+    });
   async function connectToRoom() {
     const roomUrl = "wss://video-call-m23damml.livekit.cloud";
     let getRoom = await listRooms();
@@ -75,55 +73,12 @@
     roomSize = room.participants.size;
     console.log(room.state);
     console.log(room.participants);
-    // room.on(RoomEvent.ParticipantConnected, (participant) => {
-    //   console.log("participant connected");
-    //   participant.videoTracks.forEach((publication) => {
-    //     const videoTrack = publication.track;
-    //     displayVideoTrack(videoTrack);
-    //   });
-    // });
-
-    // // Event participantDisconnected
-    // room.on(RoomEvent.ParticipantDisconnected, (participant) => {
-    //   // Menghapus video element dari participant yang keluar dari room
-    //   participantVideoTracks = participantVideoTracks.filter(
-    //     (element) => element.srcObject !== participant.videoTracks
-    //   );
-    // });
-    // room
-    //   .on(RoomEvent.TrackUnsubscribed, handleTrackUnsubscribed)
-    //   .on(RoomEvent.ActiveSpeakersChanged, handleActiveSpeakerChange)
-    //   .on(RoomEvent.Disconnected, handleDisconnect)
-    //   .on(RoomEvent.LocalTrackUnpublished, handleLocalTrackUnpublished)
-    //   .on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
-
-    // // Menampilkan video participant yang telah bergabung sebelumnya di room
-    // room.participants.forEach((participant) => {
-    //   participant.videoTracks.forEach((publication) => {
-    //     const videoTrack = publication.track;
-    //     displayVideoTrack(videoTrack);
-    //   });
-    // });
   }
 
   /**
    * @param {any} videoTrack
    */
-  function displayVideoTrack(videoTrack) {
-    const videoElement = document.createElement("video");
-    // @ts-ignore
-    videoElement.srcObject = new MediaStream([videoTrack]);
-    videoElement.autoplay = true;
-    videoElement.muted = true;
 
-    const videoContainer = document.getElementById("videoContainer");
-    // @ts-ignore
-    videoContainer.appendChild(videoElement);
-
-    // Menyimpan video element dalam array
-    // @ts-ignore
-    participantVideoTracks.push(videoElement);
-  }
   /**
    * @param {RemoteTrackPublication} publication
    * @param {RemoteParticipant} participant
@@ -147,14 +102,6 @@
     );
   }
 
-  room.participants.forEach((participant) => {
-    console.log(participant.videoTracks);
-    participant.videoTracks.forEach((publication) => {
-      const videoTrack = publication.track;
-      // @ts-ignore
-      displayVideoTrack(videoTrack);
-    });
-  });
   /**
    * @param {RemoteTrack} track
    * @param {RemoteTrackPublication} publication
@@ -192,13 +139,6 @@
   }
 
   onMount(() => {
-    room
-      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
-      .on(RoomEvent.TrackPublished, handleTrackPublished)
-      .on(RoomEvent.ParticipantConnected, (participant) => {
-        console.log(`Participant connected: ${participant.identity}`);
-        // Lakukan tindakan yang diinginkan setelah bergabung ke room
-      });
     connectToRoom();
   });
 
