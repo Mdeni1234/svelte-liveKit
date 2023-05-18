@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
   // @ts-nocheck
 
   import { onMount, onDestroy } from "svelte";
@@ -122,9 +122,86 @@
   onDestroy(() => {
     room.disconnect();
   });
+</script> -->
+<script>
+  // @ts-nocheck
+
+  import { onMount, onDestroy } from "svelte";
+  import { RoomEvent, Room } from "livekit-client";
+  import {
+    createRoom,
+    createToken,
+    listRooms,
+  } from "../../services/api-services";
+
+  let room;
+  let localVideoElement;
+  let remoteVideoElements = [];
+
+  async function connectToRoom() {
+    const roomUrl = "wss://video-call-m23damml.livekit.cloud";
+    let getRoom = await listRooms();
+    if (getRoom.length === 0) {
+      await createRoom({ room: 1 });
+      getRoom = await listRooms();
+    }
+    const jwt = await createToken({
+      roomName: getRoom[0].name,
+      participant: "User",
+    });
+    room = new Room();
+    room.on(RoomEvent.Connected, handleConnected);
+    room.on(RoomEvent.ParticipantConnected, handleParticipantConnected);
+    room.on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
+    room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
+
+    await room.connect(roomUrl, jwt);
+    await room.localParticipant.enableCameraAndMicrophone();
+    await room.localParticipant.publishTracks();
+  }
+
+  function handleConnected() {
+    console.log("Connected to room");
+  }
+
+  function handleParticipantConnected(participant) {
+    console.log(`Participant connected: ${participant.identity}`);
+    const remoteVideoElement = document.createElement("video");
+    remoteVideoElement.autoplay = true;
+    remoteVideoElement.muted = true;
+    remoteVideoElements = [...remoteVideoElements, remoteVideoElement];
+    participant.videoTracks.forEach((track) => {
+      handleTrackSubscribed(track, participant);
+    });
+  }
+
+  function handleParticipantDisconnected(participant) {
+    console.log(`Participant disconnected: ${participant.identity}`);
+    remoteVideoElements = remoteVideoElements.filter(
+      (element) => element.participant !== participant
+    );
+  }
+
+  function handleTrackSubscribed(track, participant) {
+    console.log(`Track subscribed: ${track.sid}`);
+    const remoteVideoElement = remoteVideoElements.find(
+      (element) => element.participant === participant
+    );
+    track.attach(remoteVideoElement);
+  }
+
+  onMount(() => {
+    connectToRoom();
+  });
+
+  onDestroy(() => {
+    if (room) {
+      room.disconnect();
+    }
+  });
 </script>
 
-<main>
+<!-- <main>
   <h1>{roomSize}</h1>
   <div class="container" id="videoContainer">
     <video
@@ -141,6 +218,12 @@
       muted
     />
   </div>
+</main> -->
+<main>
+  <video bind:this={localVideoElement} autoplay muted />
+  {#each remoteVideoElements as remoteVideoElement (remoteVideoElement.participant.identity)}
+    <video bind:this={remoteVideoElement} />
+  {/each}
 </main>
 
 <style>
