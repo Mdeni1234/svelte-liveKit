@@ -151,7 +151,7 @@
     <video
       class="video-participant"
       id="localVideo"
-      bind:this={localVideoElement}
+      bind:this={localVideoTrack}
       autoplay
       muted
     />
