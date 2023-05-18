@@ -103,15 +103,15 @@
     // localVideoElement.srcObject = new MediaStream([
     //   localVideoTrack.mediaStreamTrack,
     // ]);
+
+    await room.connect(roomUrl, jwt);
+    await room.localParticipant.enableCameraAndMicrophone();
     room
       .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
       .on(RoomEvent.TrackPublished, handleTrackPublished)
       .on(RoomEvent.ParticipantConnected, (participant) => {
         console.log(`Participant connected: ${participant.identity}`);
       });
-
-    await room.connect(roomUrl, jwt);
-    await room.localParticipant.enableCameraAndMicrophone();
   }
 
   /**
