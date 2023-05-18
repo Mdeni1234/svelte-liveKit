@@ -44,7 +44,7 @@
    */
   let participantVideoTracks = [];
   /**
-   * @type {{ appendChild: (arg0: HTMLVideoElement) => void; }}
+   * @type {HTMLVideoElement}
    */
   let participantElement;
 
@@ -66,8 +66,6 @@
       localVideoTrack.mediaStreamTrack,
     ]);
     await room.connect(roomUrl, jwt);
-    console.log(room);
-    console.log(getRoom);
     await room.localParticipant.enableCameraAndMicrophone();
     room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
     // room.on(RoomEvent.ParticipantConnected, (participant) => {
@@ -154,22 +152,7 @@
    * @param {RemoteParticipant} participant
    */
   function handleTrackSubscribed(track, publication, participant) {
-    /**
-     * @param number
-     */
-    const participantId = participant.sid;
-
-    if (!participantVideoTracks[participantId]) {
-      const videoElement = document.createElement("video");
-      videoElement.autoplay = true;
-      videoElement.muted = true;
-
-      participantVideoTracks[participantId] = videoElement;
-
-      participantElement.appendChild(videoElement);
-    }
-
-    track.attach(participantVideoTracks[participantId]);
+    track.attach(participantElement);
   }
   /**
    * @param {RemoteTrack} track
@@ -219,14 +202,12 @@
       autoplay
       muted
     />
-    <ul>
-      {#each participantVideoTracks as participant}
-        <li>{participant.identity}</li>
-        <video bind:this={participant.videoElement} autoplay
-          ><track kind="captions" /></video
-        >
-      {/each}
-    </ul>
+    <video
+      class="video-participant"
+      bind:this={participantElement}
+      autoplay
+      muted
+    />
   </div>
 </main>
 
