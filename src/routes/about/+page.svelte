@@ -43,6 +43,10 @@
    * @type {RemoteParticipant[] | any[]}
    */
   let participantVideoTracks = [];
+  /**
+   * @type {{ appendChild: (arg0: HTMLVideoElement) => void; }}
+   */
+  let participantElement;
 
   async function connectToRoom() {
     const roomUrl = "wss://video-call-m23damml.livekit.cloud";
@@ -65,6 +69,7 @@
     console.log(room);
     console.log(getRoom);
     await room.localParticipant.enableCameraAndMicrophone();
+    room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
     // room.on(RoomEvent.ParticipantConnected, (participant) => {
     //   console.log("participant connected");
     //   participant.videoTracks.forEach((publication) => {
@@ -149,10 +154,22 @@
    * @param {RemoteParticipant} participant
    */
   function handleTrackSubscribed(track, publication, participant) {
-    console.log(track);
-    if (track.kind === "video" && participant instanceof RemoteParticipant) {
-      participantVideoTracks = Array.from(room.participants.values());
+    /**
+     * @param number
+     */
+    const participantId = participant.sid;
+
+    if (!participantVideoTracks[participantId]) {
+      const videoElement = document.createElement("video");
+      videoElement.autoplay = true;
+      videoElement.muted = true;
+
+      participantVideoTracks[participantId] = videoElement;
+
+      participantElement.appendChild(videoElement);
     }
+
+    track.attach(participantVideoTracks[participantId]);
   }
   /**
    * @param {RemoteTrack} track
@@ -193,8 +210,15 @@
 </script>
 
 <main>
+  <h1>{room.participants.size}</h1>
   <div class="container" id="videoContainer">
-    <video id="localVideo" bind:this={localVideoElement} autoplay muted />
+    <video
+      class="video-participant"
+      id="localVideo"
+      bind:this={localVideoElement}
+      autoplay
+      muted
+    />
     <ul>
       {#each participantVideoTracks as participant}
         <li>{participant.identity}</li>
