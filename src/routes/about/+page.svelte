@@ -76,6 +76,7 @@
    */
   let localVideoElement;
   let localVideoTrack;
+  let remoteParticipants = [];
 
   /**
    * @type {HTMLVideoElement}
@@ -106,20 +107,15 @@
 
     await room.connect(roomUrl, jwt);
     room
-      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed())
-      .on(RoomEvent.TrackPublished, handleTrackPublished())
-      .on(RoomEvent.ParticipantConnected, handleParticipantConected());
+      .on(RoomEvent.TrackSubscribed, () => handleTrackSubscribed)
+      .on(RoomEvent.ParticipantConnected, () => handleParticipantConected);
   };
-  /**
-   * @param {RemoteTrackPublication} publication
-   * @param {RemoteParticipant} participant
-   */
-  const handleTrackPublished = async (publication, participant) => {
-    console.log("publish track ok");
-  };
-  const handleParticipantConected = async (participant) => {
-    console.log(`Participant connected: ${participant.identity}`);
-  };
+
+  function handleParticipantConected(participant) {
+    console.log(`Participant connected: ${participant}`);
+    remoteParticipants = [...remoteParticipants, participant];
+    console.log(remoteParticipants);
+  }
 
   const handleTrackSubscribed = (track, publication, participant) => {
     // track.attach(participantElement);
