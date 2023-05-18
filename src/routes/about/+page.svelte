@@ -59,12 +59,10 @@
     await room.connect(roomUrl, jwt);
     localParticipant = room.localParticipant;
     const videoElement = document.createElement("video");
-    const setVideoElement = document.getElementById("local-video");
     videoElement.srcObject = localParticipant.videoTrack;
     videoElement.style.width = "100%";
     videoElement.style.height = "100%";
-    // @ts-ignore
-    setVideoElement.appendChild(videoElement);
+    document.body.appendChild(videoElement);
     console.log(localParticipant);
     // publish local camera and mic tracks
     await room.localParticipant.enableCameraAndMicrophone();
@@ -126,7 +124,15 @@
 
   <h2>Local Participant</h2>
   {#if localParticipant && localParticipant.videoTracks}
-    <div id="local-video" />
+    <video class="participant" id="local-video" autoplay muted>
+      <track
+        kind="captions"
+        src={localParticipant.videoTrack}
+        srclang="en"
+        label="English"
+        default
+      />
+    </video>
   {/if}
   <h2>Remote Participants:</h2>
   {#each remoteParticipants as participant}
