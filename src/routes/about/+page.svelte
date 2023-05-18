@@ -51,7 +51,7 @@
   /**
    * @type {number}
    */
-  let roomSize;
+  let roomSize = 0;
 
   async function connectToRoom() {
     const roomUrl = "wss://video-call-m23damml.livekit.cloud";
@@ -62,7 +62,7 @@
     }
     const jwt = await createToken({
       roomName: getRoom[0].name,
-      participant: "Deni",
+      participant: "User",
     });
     localVideoTrack = await createLocalVideoTrack();
 
@@ -73,7 +73,8 @@
     await room.connect(roomUrl, jwt);
     await room.localParticipant.enableCameraAndMicrophone();
     roomSize = room.participants.size;
-
+    console.log(room.state);
+    console.log(room.participants);
     // room.on(RoomEvent.ParticipantConnected, (participant) => {
     //   console.log("participant connected");
     //   participant.videoTracks.forEach((publication) => {
