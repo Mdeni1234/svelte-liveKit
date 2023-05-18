@@ -38,7 +38,7 @@
     });
     await room.connect(roomUrl, jwt);
     localParticipant = room.localParticipant;
-    console.log(room.participants);
+    await room.localParticipant.enableCameraAndMicrophone();
   }
   room.on(RoomEvent.ParticipantConnected, handleParticipantConnected);
   room.on("participantDisconnected", handleParticipantDisconnected);
