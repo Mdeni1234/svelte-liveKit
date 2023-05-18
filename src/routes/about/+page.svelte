@@ -8,6 +8,11 @@
     RoomEvent,
     RemoteTrackPublication,
     RemoteParticipant,
+    LocalParticipant,
+    LocalTrackPublication,
+    RemoteTrack,
+    Track,
+    VideoPresets,
   } from "livekit-client";
   import {
     createRoom,
@@ -15,9 +20,17 @@
     listRooms,
   } from "../../services/api-services";
 
-  let room = new Room();
+  let room = new Room({
+    adaptiveStream: true,
+
+    dynacast: true,
+    videoCaptureDefaults: {
+      resolution: VideoPresets.h720.resolution,
+    },
+  });
+
   /**
-   * @type {Participant | any}
+   * @type {LocalParticipant | any}
    */
   let localParticipant;
   /**
@@ -36,49 +49,61 @@
       roomName: getRoom[0].name,
       participant: "Deni",
     });
+    room
+      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
+      .on(RoomEvent.TrackUnsubscribed, handleTrackUnsubscribed)
+      .on(RoomEvent.ActiveSpeakersChanged, handleActiveSpeakerChange)
+      .on(RoomEvent.Disconnected, handleDisconnect)
+      .on(RoomEvent.LocalTrackUnpublished, handleLocalTrackUnpublished);
+
     await room.connect(roomUrl, jwt);
     localParticipant = room.localParticipant;
+
+    console.log(localParticipant);
+    // publish local camera and mic tracks
     await room.localParticipant.enableCameraAndMicrophone();
-  }
-  room.on(RoomEvent.ParticipantConnected, handleParticipantConnected);
-  room.on("participantDisconnected", handleParticipantDisconnected);
-  room.on("trackPublished", handleTrackPublished);
-  room.on("trackUnpublished", handleTrackUnpublished);
 
-  /**
-   * @param {{ identity: any; }} participant
-   */
-  function handleParticipantConnected(participant) {
-    remoteParticipants = [...remoteParticipants, participant];
-    console.log(room.participants.size);
-  }
+    /**
+     * @param {RemoteTrack} track
+     * @param {RemoteTrackPublication} publication
+     * @param {RemoteParticipant} participant
+     */
+    function handleTrackSubscribed(track, publication, participant) {
+      console.log(track);
+      if (track.kind === Track.Kind.Video || track.kind === Track.Kind.Audio) {
+        const element = track.attach();
+        const parentElement = document.getElementById("local-video");
+        // @ts-ignore
+        parentElement.appendChild(element);
+      }
+    }
+    /**
+     * @param {RemoteTrack} track
+     * @param {RemoteTrackPublication} publication
+     * @param {RemoteParticipant} participant
+     */
+    function handleTrackUnsubscribed(track, publication, participant) {
+      // remove tracks from all attached elements
+      track.detach();
+    }
+    /**
+     * @param {LocalTrackPublication} track
+     * @param {LocalParticipant} participant
+     */
+    function handleLocalTrackUnpublished(track, participant) {
+      // when local tracks are ended, update UI to remove them from rendering
+      // track.detach();
+    }
+    /**
+     * @param {Participant[]} speakers
+     */
+    function handleActiveSpeakerChange(speakers) {
+      // show UI indicators when participant is speaking
+    }
 
-  /**
-   * @param {{ identity: any; }} participant
-   */
-  function handleParticipantDisconnected(participant) {
-    console.log("Remote participant disconnected:", participant.identity);
-    // Lakukan tindakan yang sesuai
-  }
-
-  /**
-   * @param {{ kind: any; }} publication
-   * @param {{ identity: any; }} participant
-   */
-  function handleTrackPublished(publication, participant) {
-    console.log("Track published by:", participant.identity);
-    console.log("Publication kind:", publication.kind);
-    // Lakukan tindakan yang sesuai
-  }
-
-  /**
-   * @param {{ kind: any; }} publication
-   * @param {{ identity: any; }} participant
-   */
-  function handleTrackUnpublished(publication, participant) {
-    console.log("Track unpublished by:", participant.identity);
-    console.log("Publication kind:", publication.kind);
-    // Lakukan tindakan yang sesuai
+    function handleDisconnect() {
+      console.log("disconnected from room");
+    }
   }
 
   onMount(() => {
@@ -93,18 +118,16 @@
 <div>
   <h1>Video Call</h1>
 
-  <h2>Local Participant:</h2>
+  <h2>Local Participant</h2>
   {#if localParticipant && localParticipant.videoTracks}
     <video
+      src={localParticipant.videoTracks}
       class="participant"
-      bind:this={localParticipant.videoTracks}
-      autoplay={true}
-      muted={true}
-    >
-      <track kind="captions" srclang="en" label="English" default />
-    </video>
+      id="local-video"
+      autoplay
+      muted
+    />
   {/if}
-
   <h2>Remote Participants:</h2>
   {#each remoteParticipants as participant}
     {#if participant.videoTrack}
