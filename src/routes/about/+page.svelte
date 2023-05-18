@@ -86,7 +86,7 @@
    */
   let roomSize = 0;
 
-  async function connectToRoom() {
+  const connectToRoom = async () => {
     const roomUrl = "wss://video-call-m23damml.livekit.cloud";
     let getRoom = await listRooms();
     if (getRoom.length === 0) {
@@ -105,60 +105,26 @@
     // ]);
 
     await room.connect(roomUrl, jwt);
-    await room.localParticipant.enableCameraAndMicrophone();
     room
-      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
-      .on(RoomEvent.TrackPublished, handleTrackPublished)
-      .on(RoomEvent.ParticipantConnected, (participant) => {
-        console.log(`Participant connected: ${participant.identity}`);
-      });
-  }
-
+      .on(RoomEvent.TrackSubscribed, () => handleTrackSubscribed())
+      .on(RoomEvent.TrackPublished, handleTrackPublished())
+      .on(RoomEvent.ParticipantConnected, () => handleParticipantConected);
+  };
   /**
    * @param {RemoteTrackPublication} publication
    * @param {RemoteParticipant} participant
    */
   const handleTrackPublished = async (publication, participant) => {
     console.log("publish track ok");
-    localVideoTrack = await createLocalVideoTrack({
-      facingMode: "user",
-      resolution: VideoPresets.h720,
-    });
-    const audioTrack = await createLocalAudioTrack({
-      echoCancellation: true,
-      noiseSuppression: true,
-    });
-
-    const videoPublication = await room.localParticipant.publishTrack(
-      localVideoTrack
-    );
-    const audioPublication = await room.localParticipant.publishTrack(
-      audioTrack
-    );
+  };
+  const handleParticipantConected = async (participant) => {
+    console.log(`Participant connected: ${participant.identity}`);
   };
 
   const handleTrackSubscribed = (track, publication, participant) => {
-    track.attach(participantElement);
+    // track.attach(participantElement);
+    console.log("track subscriber ok");
   };
-
-  function handleTrackUnsubscribed(track, publication, participant) {
-    // remove tracks from all attached elements
-    track.detach();
-  }
-
-  function handleLocalTrackUnpublished(track, participant) {
-    // when local tracks are ended, update UI to remove them from rendering
-    // track.detach();
-  }
-
-  function handleActiveSpeakerChange(speakers) {
-    // show UI indicators when participant is speaking
-  }
-
-  function handleDisconnect() {
-    console.log("disconnected from room");
-  }
-
   onMount(() => {
     connectToRoom();
   });
