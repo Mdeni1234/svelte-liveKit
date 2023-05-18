@@ -62,9 +62,39 @@
       localVideoTrack.mediaStreamTrack,
     ]);
     await room.connect(roomUrl, jwt);
-    await room.localParticipant.enableCameraAndMicrophone();
     console.log(room);
     console.log(getRoom);
+    await room.localParticipant.enableCameraAndMicrophone();
+    room.on(RoomEvent.ParticipantConnected, (participant) => {
+      console.log("participant connected");
+      participant.videoTracks.forEach((publication) => {
+        const videoTrack = publication.track;
+        displayVideoTrack(videoTrack);
+      });
+    });
+
+    // Event participantDisconnected
+    room.on(RoomEvent.ParticipantDisconnected, (participant) => {
+      // Menghapus video element dari participant yang keluar dari room
+      participantVideoTracks = participantVideoTracks.filter(
+        (element) => element.srcObject !== participant.videoTracks
+      );
+    });
+    room
+      .on(RoomEvent.TrackUnsubscribed, handleTrackUnsubscribed)
+      .on(RoomEvent.ActiveSpeakersChanged, handleActiveSpeakerChange)
+      .on(RoomEvent.Disconnected, handleDisconnect)
+      .on(RoomEvent.LocalTrackUnpublished, handleLocalTrackUnpublished)
+      .on(RoomEvent.TrackPublished, handleTrackPublished)
+      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
+
+    // Menampilkan video participant yang telah bergabung sebelumnya di room
+    room.participants.forEach((participant) => {
+      participant.videoTracks.forEach((publication) => {
+        const videoTrack = publication.track;
+        displayVideoTrack(videoTrack);
+      });
+    });
   }
 
   /**
@@ -120,11 +150,8 @@
    */
   function handleTrackSubscribed(track, publication, participant) {
     console.log(track);
-    if (track.kind === Track.Kind.Video || track.kind === Track.Kind.Audio) {
-      const element = track.attach();
-      const parentElement = document.getElementById("local-video");
-      // @ts-ignore
-      parentElement.appendChild(element);
+    if (track.kind === "video" && participant instanceof RemoteParticipant) {
+      participantVideoTracks = Array.from(room.participants.values());
     }
   }
   /**
@@ -157,35 +184,6 @@
 
   onMount(() => {
     connectToRoom();
-    room.on(RoomEvent.ParticipantConnected, (participant) => {
-      console.log("participant connected");
-      participant.videoTracks.forEach((publication) => {
-        const videoTrack = publication.track;
-        displayVideoTrack(videoTrack);
-      });
-    });
-
-    // Event participantDisconnected
-    room.on(RoomEvent.ParticipantDisconnected, (participant) => {
-      // Menghapus video element dari participant yang keluar dari room
-      participantVideoTracks = participantVideoTracks.filter(
-        (element) => element.srcObject !== participant.videoTracks
-      );
-    });
-    room
-      .on(RoomEvent.TrackUnsubscribed, handleTrackUnsubscribed)
-      .on(RoomEvent.ActiveSpeakersChanged, handleActiveSpeakerChange)
-      .on(RoomEvent.Disconnected, handleDisconnect)
-      .on(RoomEvent.LocalTrackUnpublished, handleLocalTrackUnpublished)
-      .on(RoomEvent.TrackPublished, handleTrackPublished);
-
-    // Menampilkan video participant yang telah bergabung sebelumnya di room
-    room.participants.forEach((participant) => {
-      participant.videoTracks.forEach((publication) => {
-        const videoTrack = publication.track;
-        displayVideoTrack(videoTrack);
-      });
-    });
   });
 
   onDestroy(() => {
