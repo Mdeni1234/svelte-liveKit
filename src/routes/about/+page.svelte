@@ -56,12 +56,12 @@
       roomName: getRoom[0].name,
       participant: "User",
     });
-    localVideoTrack = await createLocalVideoTrack();
+    // localVideoTrack = await createLocalVideoTrack();
 
-    // Menambahkan local video track ke video element
-    localVideoElement.srcObject = new MediaStream([
-      localVideoTrack.mediaStreamTrack,
-    ]);
+    // // Menambahkan local video track ke video element
+    // localVideoElement.srcObject = new MediaStream([
+    //   localVideoTrack.mediaStreamTrack,
+    // ]);
     room
       .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
       .on(RoomEvent.TrackPublished, handleTrackPublished)
@@ -78,17 +78,13 @@
   }
 
   /**
-   * @param {any} videoTrack
-   */
-
-  /**
    * @param {RemoteTrackPublication} publication
    * @param {RemoteParticipant} participant
    */
   async function handleTrackPublished(publication, participant) {
-    const videoTrack = await createLocalVideoTrack({
+    console.log("publish track ok");
+    localVideoTrack = await createLocalVideoTrack({
       facingMode: "user",
-      // preset resolutions
       resolution: VideoPresets.h720,
     });
     const audioTrack = await createLocalAudioTrack({
@@ -97,7 +93,7 @@
     });
 
     const videoPublication = await room.localParticipant.publishTrack(
-      videoTrack
+      localVideoTrack
     );
     const audioPublication = await room.localParticipant.publishTrack(
       audioTrack
