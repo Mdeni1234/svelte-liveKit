@@ -91,14 +91,13 @@
     // ]);
 
     room
-      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed())
-      .on(RoomEvent.ParticipantConnected, handleParticipantConected())
-      .on(RoomEvent.Connected, handleConnected());
+      .on(RoomEvent.Connected, handleConnected)
+      .on(RoomEvent.ParticipantConnected, handleParticipantConected)
+      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
     await room.connect(roomUrl, jwt);
-    console.log(getRoom);
   }
   function handleConnected() {
-    console.log("connect");
+    console.log("connect yey");
   }
   function handleParticipantConected(participant) {
     console.log(`Participant connected: ${participant}`);
