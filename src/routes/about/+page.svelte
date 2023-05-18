@@ -48,6 +48,9 @@
    * @type {HTMLVideoElement}
    */
   let participantElement;
+  /**
+   * @type {number}
+   */
   let roomSize;
 
   async function connectToRoom() {
@@ -70,13 +73,7 @@
     await room.connect(roomUrl, jwt);
     await room.localParticipant.enableCameraAndMicrophone();
     roomSize = room.participants.size;
-    room
-      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
-      .on(RoomEvent.TrackPublished, handleTrackPublished)
-      .on(RoomEvent.ParticipantConnected, (participant) => {
-        console.log(`Participant connected: ${participant.identity}`);
-        // Lakukan tindakan yang diinginkan setelah bergabung ke room
-      });
+
     // room.on(RoomEvent.ParticipantConnected, (participant) => {
     //   console.log("participant connected");
     //   participant.videoTracks.forEach((publication) => {
@@ -194,6 +191,13 @@
   }
 
   onMount(() => {
+    room
+      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
+      .on(RoomEvent.TrackPublished, handleTrackPublished)
+      .on(RoomEvent.ParticipantConnected, (participant) => {
+        console.log(`Participant connected: ${participant.identity}`);
+        // Lakukan tindakan yang diinginkan setelah bergabung ke room
+      });
     connectToRoom();
   });
 
