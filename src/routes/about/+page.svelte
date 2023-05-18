@@ -24,7 +24,7 @@
     listRooms,
   } from "../../services/api-services";
 
-  let room = new Room({
+  const room = new Room({
     audioCaptureDefaults: {
       autoGainControl: true,
       deviceId: "",
@@ -112,10 +112,6 @@
 
     await room.connect(roomUrl, jwt);
     await room.localParticipant.enableCameraAndMicrophone();
-    roomSize = room.participants.size;
-    console.log(room.state);
-    console.log(room.participants);
-    console.log(getRoom);
   }
 
   /**
