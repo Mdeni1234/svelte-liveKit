@@ -2,29 +2,14 @@
   // @ts-nocheck
 
   import { onMount, onDestroy } from "svelte";
-  import {
-    Room,
-    ParticipantEvent,
-    TrackEvent,
-    Participant,
-    RoomEvent,
-    RemoteTrackPublication,
-    RemoteParticipant,
-    LocalParticipant,
-    LocalTrackPublication,
-    RemoteTrack,
-    Track,
-    VideoPresets,
-    createLocalVideoTrack,
-    createLocalAudioTrack,
-  } from "livekit-client";
+  import { RoomEvent, Room } from "livekit-client";
   import {
     createRoom,
     createToken,
     listRooms,
   } from "../../services/api-services";
 
-  const room = new Room({
+  let room = new Room({
     audioCaptureDefaults: {
       autoGainControl: true,
       deviceId: "",
@@ -87,7 +72,7 @@
    */
   let roomSize = 0;
 
-  const connectToRoom = async () => {
+  async function connectToRoom() {
     const roomUrl = "wss://video-call-m23damml.livekit.cloud";
     let getRoom = await listRooms();
     if (getRoom.length === 0) {
@@ -105,12 +90,16 @@
     //   localVideoTrack.mediaStreamTrack,
     // ]);
 
-    await room.connect(roomUrl, jwt);
     room
-      .on(RoomEvent.TrackSubscribed, () => handleTrackSubscribed)
-      .on(RoomEvent.ParticipantConnected, () => handleParticipantConected);
-  };
-
+      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed())
+      .on(RoomEvent.ParticipantConnected, handleParticipantConected())
+      .on(RoomEvent.Connected, handleConnected());
+    await room.connect(roomUrl, jwt);
+    console.log(getRoom);
+  }
+  function handleConnected() {
+    console.log("connect");
+  }
   function handleParticipantConected(participant) {
     console.log(`Participant connected: ${participant}`);
     remoteParticipants = [...remoteParticipants, participant];
