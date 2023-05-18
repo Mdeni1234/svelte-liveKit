@@ -14,6 +14,7 @@
     Track,
     VideoPresets,
     createLocalVideoTrack,
+    createLocalAudioTrack,
   } from "livekit-client";
   import {
     createRoom,
@@ -67,7 +68,9 @@
     ]);
     await room.connect(roomUrl, jwt);
     await room.localParticipant.enableCameraAndMicrophone();
-    room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
+    room
+      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
+      .on(RoomEvent.TrackPublished, handleTrackPublished);
     // room.on(RoomEvent.ParticipantConnected, (participant) => {
     //   console.log("participant connected");
     //   participant.videoTracks.forEach((publication) => {
@@ -88,7 +91,6 @@
     //   .on(RoomEvent.ActiveSpeakersChanged, handleActiveSpeakerChange)
     //   .on(RoomEvent.Disconnected, handleDisconnect)
     //   .on(RoomEvent.LocalTrackUnpublished, handleLocalTrackUnpublished)
-    //   .on(RoomEvent.TrackPublished, handleTrackPublished)
     //   .on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
 
     // // Menampilkan video participant yang telah bergabung sebelumnya di room
@@ -122,20 +124,23 @@
    * @param {RemoteTrackPublication} publication
    * @param {RemoteParticipant} participant
    */
-  function handleTrackPublished(publication, participant) {
-    console.log("track published");
+  async function handleTrackPublished(publication, participant) {
+    const videoTrack = await createLocalVideoTrack({
+      facingMode: "user",
+      // preset resolutions
+      resolution: VideoPresets.h720,
+    });
+    const audioTrack = await createLocalAudioTrack({
+      echoCancellation: true,
+      noiseSuppression: true,
+    });
 
-    participantVideoTracks = [...participantVideoTracks, participant];
-    const videoTrack = publication.track;
-
-    const videoElement = document.createElement("video");
-    // @ts-ignore
-    videoElement.srcObject = new MediaStream([videoTrack.mediaStreamTrack]);
-    videoElement.autoplay = true;
-    videoElement.muted = false;
-    videoElement.classList.add("video-participant");
-    // @ts-ignore
-    document.getElementById("videoContainer").appendChild(videoElement);
+    const videoPublication = await room.localParticipant.publishTrack(
+      videoTrack
+    );
+    const audioPublication = await room.localParticipant.publishTrack(
+      audioTrack
+    );
   }
 
   room.participants.forEach((participant) => {
