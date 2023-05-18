@@ -44,13 +44,7 @@
    * @type {number}
    */
   let roomSize = 0;
-  room
-    .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
-    .on(RoomEvent.TrackPublished, handleTrackPublished)
-    .on(RoomEvent.ParticipantConnected, (participant) => {
-      console.log(`Participant connected: ${participant.identity}`);
-      // Lakukan tindakan yang diinginkan setelah bergabung ke room
-    });
+
   async function connectToRoom() {
     const roomUrl = "wss://video-call-m23damml.livekit.cloud";
     let getRoom = await listRooms();
@@ -68,11 +62,19 @@
     localVideoElement.srcObject = new MediaStream([
       localVideoTrack.mediaStreamTrack,
     ]);
+    room
+      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
+      .on(RoomEvent.TrackPublished, handleTrackPublished)
+      .on(RoomEvent.ParticipantConnected, (participant) => {
+        console.log(`Participant connected: ${participant.identity}`);
+      });
+
     await room.connect(roomUrl, jwt);
     await room.localParticipant.enableCameraAndMicrophone();
     roomSize = room.participants.size;
     console.log(room.state);
     console.log(room.participants);
+    console.log(getRoom);
   }
 
   /**
