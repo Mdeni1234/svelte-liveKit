@@ -48,6 +48,7 @@
    * @type {HTMLVideoElement}
    */
   let participantElement;
+  let roomSize;
 
   async function connectToRoom() {
     const roomUrl = "wss://video-call-m23damml.livekit.cloud";
@@ -68,6 +69,7 @@
     ]);
     await room.connect(roomUrl, jwt);
     await room.localParticipant.enableCameraAndMicrophone();
+    roomSize = room.participants.size;
     room
       .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
       .on(RoomEvent.TrackPublished, handleTrackPublished)
@@ -193,7 +195,6 @@
 
   onMount(() => {
     connectToRoom();
-    console.log(participantVideoTracks);
   });
 
   onDestroy(() => {
@@ -202,7 +203,7 @@
 </script>
 
 <main>
-  <h1>{room.participants.size}</h1>
+  <h1>{roomSize}</h1>
   <div class="container" id="videoContainer">
     <video
       class="video-participant"
