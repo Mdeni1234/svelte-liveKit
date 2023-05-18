@@ -141,34 +141,20 @@
     );
   };
 
-  /**
-   * @param {RemoteTrack} track
-   * @param {RemoteTrackPublication} publication
-   * @param {RemoteParticipant} participant
-   */
   const handleTrackSubscribed = (track, publication, participant) => {
     track.attach(participantElement);
   };
-  /**
-   * @param {RemoteTrack} track
-   * @param {RemoteTrackPublication} publication
-   * @param {RemoteParticipant} participant
-   */
+
   function handleTrackUnsubscribed(track, publication, participant) {
     // remove tracks from all attached elements
     track.detach();
   }
-  /**
-   * @param {LocalTrackPublication} track
-   * @param {LocalParticipant} participant
-   */
+
   function handleLocalTrackUnpublished(track, participant) {
     // when local tracks are ended, update UI to remove them from rendering
     // track.detach();
   }
-  /**
-   * @param {Participant[]} speakers
-   */
+
   function handleActiveSpeakerChange(speakers) {
     // show UI indicators when participant is speaking
   }
