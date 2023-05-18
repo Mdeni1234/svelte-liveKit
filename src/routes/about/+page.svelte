@@ -1,4 +1,6 @@
 <script>
+  // @ts-nocheck
+
   import { onMount, onDestroy } from "svelte";
   import {
     Room,
@@ -23,11 +25,50 @@
   } from "../../services/api-services";
 
   let room = new Room({
-    adaptiveStream: true,
-
-    dynacast: true,
+    audioCaptureDefaults: {
+      autoGainControl: true,
+      deviceId: "",
+      echoCancellation: true,
+      noiseSuppression: true,
+    },
     videoCaptureDefaults: {
-      resolution: VideoPresets.h180.resolution,
+      deviceId: "",
+      facingMode: "user",
+      resolution: {
+        width: 1280,
+        height: 720,
+        frameRate: 30,
+      },
+    },
+    publishDefaults: {
+      videoEncoding: {
+        maxBitrate: 1_500_000,
+        maxFramerate: 30,
+      },
+      screenShareEncoding: {
+        maxBitrate: 1_500_000,
+        maxFramerate: 30,
+      },
+      audioBitrate: 20_000,
+      dtx: true,
+      videoSimulcastLayers: [
+        {
+          width: 640,
+          height: 360,
+          encoding: {
+            maxBitrate: 500_000,
+            maxFramerate: 20,
+          },
+        },
+        {
+          width: 320,
+          height: 180,
+          encoding: {
+            maxBitrate: 150_000,
+            maxFramerate: 15,
+          },
+        },
+      ],
     },
   });
   /**
