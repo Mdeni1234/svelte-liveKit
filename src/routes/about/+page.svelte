@@ -106,9 +106,9 @@
 
     await room.connect(roomUrl, jwt);
     room
-      .on(RoomEvent.TrackSubscribed, () => handleTrackSubscribed())
-      .on(RoomEvent.TrackPublished, () => handleTrackPublished())
-      .on(RoomEvent.ParticipantConnected, () => handleParticipantConected());
+      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed())
+      .on(RoomEvent.TrackPublished, handleTrackPublished())
+      .on(RoomEvent.ParticipantConnected, handleParticipantConected());
   };
   /**
    * @param {RemoteTrackPublication} publication
