@@ -90,6 +90,8 @@
    * @param {RemoteParticipant} participant
    */
   function handleTrackPublished(publication, participant) {
+    console.log("track published");
+
     participantVideoTracks = [...participantVideoTracks, participant];
     const videoTrack = publication.track;
 
