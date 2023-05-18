@@ -194,7 +194,7 @@
 </script>
 
 <main>
-  <div id="videoContainer">
+  <div class="container" id="videoContainer">
     <video id="localVideo" bind:this={localVideoElement} autoplay muted />
     <ul>
       {#each participantVideoTracks as participant}
@@ -208,22 +208,14 @@
 </main>
 
 <style>
-  #videoContainer {
-    width: 80vw;
-    margin: auto;
+  .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
   .video-participant {
     display: flex;
-    flex: 1 0 auto;
-    width: 50vw;
-    aspect-ratio: 4/3;
-  }
-  .participant {
     width: 100%;
-    background: red;
-  }
-  .remote-participant {
-    width: 100%;
-    background: black;
+    place-items: center;
   }
 </style>
