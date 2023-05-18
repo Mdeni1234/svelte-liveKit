@@ -2,7 +2,12 @@
   // @ts-nocheck
 
   import { onMount, onDestroy } from "svelte";
-  import { RoomEvent, Room } from "livekit-client";
+  import {
+    RoomEvent,
+    Room,
+    Participant,
+    ParticipantEvent,
+  } from "livekit-client";
   import {
     createRoom,
     createToken,
@@ -90,14 +95,14 @@
     //   localVideoTrack.mediaStreamTrack,
     // ]);
 
-    room
-      .on(RoomEvent.Connected, handleConnected)
-      .on(RoomEvent.ParticipantConnected, handleParticipantConected)
-      .on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
+    room.on(RoomEvent.Connected, handleConnected);
+    room.on(RoomEvent.ParticipantConnected, handleParticipantConected);
+    room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
     await room.connect(roomUrl, jwt);
+    await room.localParticipant.enableCameraAndMicrophone();
   }
   function handleConnected() {
-    console.log("connect yey");
+    console.log(room.participants);
   }
   function handleParticipantConected(participant) {
     console.log(`Participant connected: ${participant}`);
@@ -108,6 +113,7 @@
   const handleTrackSubscribed = (track, publication, participant) => {
     // track.attach(participantElement);
     console.log("track subscriber ok");
+    console.log(track, publication, participant);
   };
   onMount(() => {
     connectToRoom();
