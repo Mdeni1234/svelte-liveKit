@@ -91,22 +91,20 @@
    */
   function handleTrackPublished(publication, participant) {
     participantVideoTracks = [...participantVideoTracks, participant];
-    // Mendapatkan video track dari publication
     const videoTrack = publication.track;
 
-    // Menambahkan video track ke video element baru
     const videoElement = document.createElement("video");
     // @ts-ignore
     videoElement.srcObject = new MediaStream([videoTrack.mediaStreamTrack]);
     videoElement.autoplay = true;
     videoElement.muted = false;
-    videoElement.style.width = "100%";
-    videoElement.style.height = "auto";
+    videoElement.classList.add("video-participant");
     // @ts-ignore
     document.getElementById("videoContainer").appendChild(videoElement);
   }
 
   room.participants.forEach((participant) => {
+    console.log(participant.videoTracks);
     participant.videoTracks.forEach((publication) => {
       const videoTrack = publication.track;
       // @ts-ignore
@@ -205,6 +203,12 @@
 </main>
 
 <style>
+  .video-participant {
+    display: flex;
+    flex: 1 0 auto;
+    width: 100vw;
+    aspect-ratio: 4/3;
+  }
   .participant {
     width: 100%;
     background: red;
