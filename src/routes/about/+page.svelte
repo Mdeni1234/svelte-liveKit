@@ -81,7 +81,7 @@
    * @param {RemoteTrackPublication} publication
    * @param {RemoteParticipant} participant
    */
-  async function handleTrackPublished(publication, participant) {
+  const handleTrackPublished = async (publication, participant) => {
     console.log("publish track ok");
     localVideoTrack = await createLocalVideoTrack({
       facingMode: "user",
@@ -98,16 +98,16 @@
     const audioPublication = await room.localParticipant.publishTrack(
       audioTrack
     );
-  }
+  };
 
   /**
    * @param {RemoteTrack} track
    * @param {RemoteTrackPublication} publication
    * @param {RemoteParticipant} participant
    */
-  function handleTrackSubscribed(track, publication, participant) {
+  const handleTrackSubscribed = (track, publication, participant) => {
     track.attach(participantElement);
-  }
+  };
   /**
    * @param {RemoteTrack} track
    * @param {RemoteTrackPublication} publication
