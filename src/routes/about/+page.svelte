@@ -13,6 +13,7 @@
     RemoteTrack,
     Track,
     VideoPresets,
+    createLocalVideoTrack,
   } from "livekit-client";
   import {
     createRoom,
@@ -28,6 +29,11 @@
       resolution: VideoPresets.h720.resolution,
     },
   });
+  /**
+   * @type {HTMLVideoElement}
+   */
+  let localVideoElement;
+  let localVideoTrack;
 
   /**
    * @type {LocalParticipant | any}
@@ -36,7 +42,7 @@
   /**
    * @type {RemoteParticipant[] | any[]}
    */
-  let participantVideoElements = [];
+  let participantVideoTracks = [];
 
   async function connectToRoom() {
     const roomUrl = "wss://video-call-m23damml.livekit.cloud";
@@ -49,10 +55,16 @@
       roomName: getRoom[0].name,
       participant: "Deni",
     });
+    localVideoTrack = await createLocalVideoTrack();
 
+    // Menambahkan local video track ke video element
+    localVideoElement.srcObject = new MediaStream([
+      localVideoTrack.mediaStreamTrack,
+    ]);
     await room.connect(roomUrl, jwt);
     await room.localParticipant.enableCameraAndMicrophone();
     console.log(room);
+    console.log(getRoom);
   }
 
   /**
@@ -71,19 +83,27 @@
 
     // Menyimpan video element dalam array
     // @ts-ignore
-    participantVideoElements.push(videoElement);
+    participantVideoTracks.push(videoElement);
   }
   /**
    * @param {RemoteTrackPublication} publication
    * @param {RemoteParticipant} participant
    */
   function handleTrackPublished(publication, participant) {
-    console.log("track publised");
-    if (publication.kind === "video") {
-      const videoTrack = publication.track;
-      // @ts-ignore
-      displayVideoTrack(videoTrack);
-    }
+    participantVideoTracks = [...participantVideoTracks, participant];
+    // Mendapatkan video track dari publication
+    const videoTrack = publication.track;
+
+    // Menambahkan video track ke video element baru
+    const videoElement = document.createElement("video");
+    // @ts-ignore
+    videoElement.srcObject = new MediaStream([videoTrack.mediaStreamTrack]);
+    videoElement.autoplay = true;
+    videoElement.muted = false;
+    videoElement.style.width = "100%";
+    videoElement.style.height = "auto";
+    // @ts-ignore
+    document.getElementById("videoContainer").appendChild(videoElement);
   }
 
   room.participants.forEach((participant) => {
@@ -148,7 +168,7 @@
     // Event participantDisconnected
     room.on(RoomEvent.ParticipantDisconnected, (participant) => {
       // Menghapus video element dari participant yang keluar dari room
-      participantVideoElements = participantVideoElements.filter(
+      participantVideoTracks = participantVideoTracks.filter(
         (element) => element.srcObject !== participant.videoTracks
       );
     });
@@ -174,7 +194,14 @@
 </script>
 
 <main>
-  <div id="videoContainer" />
+  <div id="videoContainer">
+    <video id="localVideo" bind:this={localVideoElement} autoplay muted />
+    <ul>
+      {#each participantVideoTracks as participant}
+        <li>{participant.identity}</li>
+      {/each}
+    </ul>
+  </div>
 </main>
 
 <style>
