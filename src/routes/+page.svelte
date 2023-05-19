@@ -24,7 +24,7 @@
    * @type {Room}
    */
   let room;
-  let localVideoElement;
+  let roomName = "";
   /**
    * @type {RemoteParticipant[]}
    */
@@ -50,8 +50,9 @@
     room.on(RoomEvent.Connected, handleConnected);
     room.on(RoomEvent.ParticipantConnected, handleParticipantConnected);
     room.on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
-
     await room.connect(roomUrl, jwt);
+    roomName = room.name;
+    console.log(room.participants, room.name);
     await publishTracks();
   }
   async function publishTracks() {
@@ -102,7 +103,7 @@
       const videoElement = document.createElement("video");
       videoElement.autoplay = true;
       const localParticipantId = room.localParticipant.sid;
-
+      console.log(participant.sid, localParticipantId);
       if (participant.sid === localParticipantId) {
         videoElement.classList.add("local-video");
       }
@@ -110,6 +111,10 @@
       // @ts-ignore
       document.getElementById("videoContainer").appendChild(videoElement);
     }
+  }
+  function closeRoom() {
+    room.disconnect();
+    window.close();
   }
 
   onMount(() => {
@@ -129,18 +134,62 @@
 </svelte:head>
 
 <main>
-  <h1>Video Call</h1>
+  <div class="container">
+    <div class="video-nav">
+      <h1>{roomName}</h1>
+      <button on:click={() => closeRoom()}>Leave Room</button>
+    </div>
 
-  <div id="videoContainer" />
+    <div id="videoContainer" />
+  </div>
 </main>
 
 <style>
+  .container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    max-width: 100vw;
+    max-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .video-nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 0 10px;
+  }
+  .video-nav h1 {
+    margin-left: auto;
+  }
+  .video-nav button {
+    color: white;
+    margin-left: auto;
+    padding: 4px 0;
+    height: 30px;
+    padding: 5px 10px;
+    overflow: hidden;
+    user-select: none;
+    background-color: #ff3e00;
+    border-radius: 10;
+    border: none;
+    text-decoration: none;
+  }
+
+  .video-nav button:hover {
+    background: #ab0000;
+    text-decoration: none;
+  }
   #videoContainer {
     display: flex;
     place-items: center;
     position: relative;
-    min-width: 100vw;
-    min-height: 100vh;
+    min-width: 100%;
+    min-height: 100%;
   }
   .videoContainer video {
     position: absolute;
