@@ -81,7 +81,7 @@
 	 * @param {RemoteParticipant} participant
 	 */
   function handleParticipantConnected(participant) {
-    console.log(participant);
+    console.log(participant.sid);
   }
 
   /**
@@ -101,10 +101,11 @@
       const videoElement = document.createElement("video");
       videoElement.autoplay = true;
       const localParticipantId = room.localParticipant.sid;
-      if (participant.sid === localParticipantId) {
+      console.log(localParticipantId, participant.sid);
+      if (participant.sid == localParticipantId) {
         videoElement.style.position = "absolute";
-        videoElement.style.top = "0px";
-        videoElement.style.right = "0px";
+        videoElement.style.top = "0";
+        videoElement.style.right = "0";
         videoElement.style.margin = "10px";
         videoElement.style.width = "200px";
         videoElement.style.height = "auto";
