@@ -26,6 +26,7 @@
   let room;
   let roomName = "";
   let roomAlert = "";
+  let roomStatus = false;
   /**
    * @type {RemoteParticipant[]}
    */
@@ -53,7 +54,7 @@
     room.on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
     await room.connect(roomUrl, jwt);
     roomName = room.name;
-    console.log(room.participants, room.name);
+    roomStatusToogle();
     if (room.participants.size > 2) {
       roomAlert = "Room Sedang Penuh";
       room.disconnect();
@@ -75,7 +76,9 @@
     await room.localParticipant.publishTrack(videoTrack);
     await room.localParticipant.publishTrack(audioTrack);
   }
-
+  function roomStatusToogle() {
+    roomStatus = !roomStatus;
+  }
   function handleConnected() {
     console.log("Connected to room");
     console.log(room);
@@ -127,7 +130,9 @@
     }
   }
   function handleRoom() {
-    room ? room.disconnect() : connectToRoom();
+    console.log(room.state);
+    roomStatusToogle();
+    room.state === "connected" ? room.disconnect() : connectToRoom();
   }
 
   onMount(() => {
@@ -136,6 +141,7 @@
 
   onDestroy(() => {
     if (room) {
+      roomStatusToogle();
       room.disconnect();
     }
   });
@@ -149,9 +155,9 @@
 <main>
   <div class="container">
     <div class="video-nav">
-      <h2>{room && roomName}</h2>
+      <h2>{roomStatus ? roomName : "..."}</h2>
       <button on:click={() => handleRoom()}
-        >{room ? "Leave Room" : "connect"}</button
+        >{roomStatus ? "Leave Room" : "connect"}</button
       >
     </div>
     {#if roomAlert.length}
