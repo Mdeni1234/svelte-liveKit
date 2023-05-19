@@ -110,7 +110,7 @@
         videoElement.style.zIndex = "2";
       } else {
         videoElement.style.width = "100%";
-        videoElement.style.maxHeight = "100vh";
+        videoElement.style.maxHeight = "85vh";
         videoElement.style.padding = "10px";
       }
       track.attach(videoElement);
