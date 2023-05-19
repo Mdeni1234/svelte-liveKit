@@ -121,43 +121,23 @@
   });
 </script>
 
-<!-- <main>
-  <h1>{roomSize}</h1>
-  <div class="container" id="videoContainer">
-    <video
-      class="video-participant"
-      id="localVideo"
-      bind:this={localVideoTrack}
-      autoplay
-      muted
-    />
-    <video
-      class="video-participant"
-      bind:this={participantElement}
-      autoplay
-      muted
-    />
-  </div>
-</main> -->
 <main>
-  <h1>Svelte LiveKit Example</h1>
-
-  <button on:click={publishTracks}>Publish Audio</button>
-
-  <h2>Remote Participants:</h2>
+  <h1>Video Call</h1>
 
   <div id="videoContainer" />
 </main>
 
 <style>
-  .container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .video-participant {
+  #videoContainer {
     display: flex;
+    min-width: 100vw;
+    min-height: 100vh;
+  }
+  .videoContainer video {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    place-items: center;
+    height: 100%;
   }
 </style>
