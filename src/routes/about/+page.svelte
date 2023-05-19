@@ -99,9 +99,14 @@
    */
   function handleTrackSubscribed(track, publication, participant) {
     console.log(`Track subscribed: ${track.sid}`);
-    if (track.kind === Track.Kind.Video || track.kind === Track.Kind.Audio) {
-      const element = track.attach();
-      document.body.appendChild(element);
+    console.log(publication);
+    console.log(participant);
+    if (track.kind === Track.Kind.Video) {
+      const videoElement = document.createElement("video");
+      videoElement.autoplay = true;
+      track.attach(videoElement);
+      // @ts-ignore
+      document.getElementById("videoContainer").appendChild(videoElement);
     }
   }
 
@@ -141,11 +146,7 @@
 
   <h2>Remote Participants:</h2>
 
-  {#each remoteParticipants as participant}
-    <div>
-      <h3>{participant.identity}</h3>
-    </div>
-  {/each}
+  <div id="videoContainer" />
 </main>
 
 <style>
