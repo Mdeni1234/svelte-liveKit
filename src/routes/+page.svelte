@@ -67,8 +67,8 @@
     const videoElement = document.createElement("video");
     videoElement.autoplay = true;
     videoElement.style.position = "absolute";
-    videoElement.style.top = "0";
-    videoElement.style.right = "0";
+    videoElement.style.top = "10px";
+    videoElement.style.right = "10px";
     videoElement.style.margin = "10px";
     videoElement.style.width = "200px";
     videoElement.style.height = "auto";
