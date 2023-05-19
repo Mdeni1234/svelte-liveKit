@@ -99,19 +99,29 @@
     if (track.kind === Track.Kind.Video) {
       const videoElement = document.createElement("video");
       videoElement.autoplay = true;
+      videoElement.style.position = "absolute";
+
+      videoElement.style.right = " 0";
       const localParticipantId = room.localParticipant.sid;
-      console.log(participant.sid, localParticipantId);
       if (participant.sid === localParticipantId) {
-        videoElement.classList.add("local-video");
+        videoElement.style.top = " 0";
+        videoElement.style.margin = "10px";
+        videoElement.style.width = "200px";
+        videoElement.style.height = "auto";
+        videoElement.style.zIndex = "2";
+      } else {
+        videoElement.style.width = "100%";
+        videoElement.style.maxHeight = "100vh";
+        videoElement.style.zIndex = "1";
+        videoElement.style.left = "0";
       }
       track.attach(videoElement);
       // @ts-ignore
       document.getElementById("videoContainer").appendChild(videoElement);
     }
   }
-  function closeRoom() {
-    room.disconnect();
-    window.close();
+  function handleRoom() {
+    room ? room.disconnect() : connectToRoom();
   }
 
   onMount(() => {
@@ -133,8 +143,10 @@
 <main>
   <div class="container">
     <div class="video-nav">
-      <h1>{roomName}</h1>
-      <button on:click={() => closeRoom()}>Leave Room</button>
+      <h2>{room && roomName}</h2>
+      <button on:click={() => handleRoom()}
+        >{room ? "Leave Room" : "connect"}</button
+      >
     </div>
 
     <div id="videoContainer" />
@@ -160,7 +172,8 @@
     width: 100%;
     padding: 0 10px;
   }
-  .video-nav h1 {
+  .video-nav h2 {
+    text-transform: uppercase;
     color: white;
     margin-left: auto;
   }
@@ -194,13 +207,17 @@
     position: absolute;
     width: 100%;
     max-height: 100vh;
+    z-index: 1;
+    right: 0;
+    left: 0;
   }
   #videoContainer video.local-video {
     position: absolute;
-    right: 1;
-    top: 1;
+    right: 0;
+    top: 0;
     margin: 10px;
     width: 200px;
+    z-index: 2;
     height: auto;
   }
 </style>
