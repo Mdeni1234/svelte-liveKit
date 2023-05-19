@@ -25,6 +25,7 @@
    */
   let room;
   let roomName = "";
+  let roomAlert = "";
   /**
    * @type {RemoteParticipant[]}
    */
@@ -53,7 +54,12 @@
     await room.connect(roomUrl, jwt);
     roomName = room.name;
     console.log(room.participants, room.name);
-    await publishTracks();
+    if (room.participants.size == 1) {
+      roomAlert = "Room Sedang Penuh";
+      room.disconnect();
+    } else {
+      await publishTracks();
+    }
   }
   async function publishTracks() {
     const videoTrack = await createLocalVideoTrack({
@@ -148,8 +154,11 @@
         >{room ? "Leave Room" : "connect"}</button
       >
     </div>
-
-    <div id="videoContainer" />
+    {#if roomAlert.length}
+      <h1 class="room-alert">{roomAlert}</h1>
+    {:else}
+      <div id="videoContainer" />
+    {/if}
   </div>
 </main>
 
@@ -190,7 +199,13 @@
     border: none;
     text-decoration: none;
   }
-
+  .room-alert {
+    display: flex;
+    margin: auto;
+    width: 100%;
+    align-items: center;
+    color: white;
+  }
   .video-nav button:hover {
     background: #ab0000;
     text-decoration: none;
