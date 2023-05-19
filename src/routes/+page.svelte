@@ -64,6 +64,18 @@
       echoCancellation: true,
       noiseSuppression: true,
     });
+    const videoElement = document.createElement("video");
+    videoElement.autoplay = true;
+    videoElement.style.position = "absolute";
+    videoElement.style.top = "0";
+    videoElement.style.right = "0";
+    videoElement.style.margin = "10px";
+    videoElement.style.width = "200px";
+    videoElement.style.height = "auto";
+    videoElement.style.zIndex = "2";
+    videoTrack.attach(videoElement);
+    // @ts-ignore
+    document.getElementById("videoContainer").appendChild(videoElement);
 
     await room.localParticipant.publishTrack(videoTrack);
     await room.localParticipant.publishTrack(audioTrack);
