@@ -104,6 +104,11 @@
     if (track.kind === Track.Kind.Video) {
       const videoElement = document.createElement("video");
       videoElement.autoplay = true;
+      const localParticipantId = room.localParticipant.sid;
+
+      if (participant.sid === localParticipantId) {
+        videoElement.classList.add("local-video");
+      }
       track.attach(videoElement);
       // @ts-ignore
       document.getElementById("videoContainer").appendChild(videoElement);
@@ -137,9 +142,15 @@
   }
   .videoContainer video {
     position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
-    height: 100%;
+    max-height: 100vh;
+  }
+  .videoContainer .local-video {
+    position: absolute;
+    right: 1;
+    top: 1;
+    margin: 10px;
+    width: 200px;
+    height: auto;
   }
 </style>
