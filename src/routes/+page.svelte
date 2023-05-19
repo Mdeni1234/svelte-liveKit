@@ -46,7 +46,7 @@
     room.on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
     await room.connect(roomUrl, jwt);
     roomName = room.name;
-    if (room.participants.size > 2) {
+    if (room.participants.size > 1) {
       roomAlert = "Room Sedang Penuh";
       room.disconnect();
     } else {
