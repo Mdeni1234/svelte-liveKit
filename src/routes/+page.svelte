@@ -54,7 +54,7 @@
     await room.connect(roomUrl, jwt);
     roomName = room.name;
     console.log(room.participants, room.name);
-    if (room.participants.size == 1) {
+    if (room.participants.size > 2) {
       roomAlert = "Room Sedang Penuh";
       room.disconnect();
     } else {
