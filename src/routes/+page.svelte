@@ -27,14 +27,6 @@
   let roomName = "";
   let roomAlert = "";
   let roomStatus = false;
-  /**
-   * @type {RemoteParticipant[]}
-   */
-  let remoteParticipants = [];
-  /**
-   * @type {RemoteVideoTrack[]}
-   */
-  let remoteVideoElements;
 
   async function connectToRoom() {
     const roomUrl = "wss://video-call-m23damml.livekit.cloud";
@@ -54,11 +46,11 @@
     room.on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
     await room.connect(roomUrl, jwt);
     roomName = room.name;
-    roomStatusToogle();
     if (room.participants.size > 2) {
       roomAlert = "Room Sedang Penuh";
       room.disconnect();
     } else {
+      roomStatusToogle();
       await publishTracks();
     }
   }
@@ -130,9 +122,8 @@
     }
   }
   function handleRoom() {
-    console.log(room.state);
-    roomStatusToogle();
     room.state === "connected" ? room.disconnect() : connectToRoom();
+    roomStatusToogle();
   }
 
   onMount(() => {
