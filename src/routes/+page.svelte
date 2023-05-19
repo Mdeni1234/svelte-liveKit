@@ -195,8 +195,10 @@
   }
   .room-alert {
     display: flex;
-    margin: auto;
+    justify-content: center;
+    align-items: center;
     width: 100%;
+    height: 100%;
     align-items: center;
     color: white;
   }
