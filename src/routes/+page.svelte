@@ -88,9 +88,6 @@
    */
   function handleParticipantDisconnected(participant) {
     console.log(`Participant disconnected: ${participant.identity}`);
-    remoteParticipants = remoteParticipants.filter(
-      (element) => element.identity !== participant.identity
-    );
   }
 
   /**
@@ -164,6 +161,7 @@
     padding: 0 10px;
   }
   .video-nav h1 {
+    color: white;
     margin-left: auto;
   }
   .video-nav button {
@@ -186,6 +184,7 @@
   }
   #videoContainer {
     display: flex;
+    justify-content: center;
     place-items: center;
     position: relative;
     min-width: 100%;
