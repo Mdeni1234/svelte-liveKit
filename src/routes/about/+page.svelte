@@ -1,12 +1,17 @@
-<!-- <script>
-  // @ts-nocheck
-
+<script>
   import { onMount, onDestroy } from "svelte";
   import {
     RoomEvent,
     Room,
+    createLocalVideoTrack,
+    RemoteParticipant,
+    VideoPresets,
+    createLocalAudioTrack,
     Participant,
-    ParticipantEvent,
+    RemoteTrack,
+    RemoteTrackPublication,
+    RemoteVideoTrack,
+    Track,
   } from "livekit-client";
   import {
     createRoom,
@@ -14,129 +19,20 @@
     listRooms,
   } from "../../services/api-services";
 
-  let room = new Room({
-    audioCaptureDefaults: {
-      autoGainControl: true,
-      deviceId: "",
-      echoCancellation: true,
-      noiseSuppression: true,
-    },
-    videoCaptureDefaults: {
-      deviceId: "",
-      facingMode: "user",
-      resolution: {
-        width: 1280,
-        height: 720,
-        frameRate: 30,
-      },
-    },
-    publishDefaults: {
-      videoEncoding: {
-        maxBitrate: 1_500_000,
-        maxFramerate: 30,
-      },
-      screenShareEncoding: {
-        maxBitrate: 1_500_000,
-        maxFramerate: 30,
-      },
-      audioBitrate: 20_000,
-      dtx: true,
-      videoSimulcastLayers: [
-        {
-          width: 640,
-          height: 360,
-          encoding: {
-            maxBitrate: 500_000,
-            maxFramerate: 20,
-          },
-        },
-        {
-          width: 320,
-          height: 180,
-          encoding: {
-            maxBitrate: 150_000,
-            maxFramerate: 15,
-          },
-        },
-      ],
-    },
-  });
+  const randomNumber = Math.floor(Math.random() * 10) + 1;
   /**
-   * @type {HTMLVideoElement}
+   * @type {Room}
    */
-  let localVideoElement;
-  let localVideoTrack;
-  let remoteParticipants = [];
-
-  /**
-   * @type {HTMLVideoElement}
-   */
-  let participantElement;
-  /**
-   * @type {number}
-   */
-  let roomSize = 0;
-
-  async function connectToRoom() {
-    const roomUrl = "wss://video-call-m23damml.livekit.cloud";
-    let getRoom = await listRooms();
-    if (getRoom.length === 0) {
-      await createRoom({ room: 1 });
-      getRoom = await listRooms();
-    }
-    const jwt = await createToken({
-      roomName: getRoom[0].name,
-      participant: "User",
-    });
-    // localVideoTrack = await createLocalVideoTrack();
-
-    // // Menambahkan local video track ke video element
-    // localVideoElement.srcObject = new MediaStream([
-    //   localVideoTrack.mediaStreamTrack,
-    // ]);
-
-    room.on(RoomEvent.Connected, handleConnected);
-    room.on(RoomEvent.ParticipantConnected, handleParticipantConected);
-    room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
-    await room.connect(roomUrl, jwt);
-    await room.localParticipant.enableCameraAndMicrophone();
-  }
-  function handleConnected() {
-    console.log(room.participants);
-  }
-  function handleParticipantConected(participant) {
-    console.log(`Participant connected: ${participant}`);
-    remoteParticipants = [...remoteParticipants, participant];
-    console.log(remoteParticipants);
-  }
-
-  const handleTrackSubscribed = (track, publication, participant) => {
-    // track.attach(participantElement);
-    console.log("track subscriber ok");
-    console.log(track, publication, participant);
-  };
-  onMount(() => {
-    connectToRoom();
-  });
-
-  onDestroy(() => {
-    room.disconnect();
-  });
-</script> -->
-<script>
-  // @ts-nocheck
-
-  import { onMount, onDestroy } from "svelte";
-  import { RoomEvent, Room } from "livekit-client";
-  import {
-    createRoom,
-    createToken,
-    listRooms,
-  } from "../../services/api-services";
-
   let room;
   let localVideoElement;
-  let remoteVideoElements = [];
+  /**
+   * @type {RemoteParticipant[]}
+   */
+  let remoteParticipants = [];
+  /**
+   * @type {RemoteVideoTrack[]}
+   */
+  let remoteVideoElements;
 
   async function connectToRoom() {
     const roomUrl = "wss://video-call-m23damml.livekit.cloud";
@@ -147,47 +43,66 @@
     }
     const jwt = await createToken({
       roomName: getRoom[0].name,
-      participant: "User",
+      participant: `user ${randomNumber}`,
     });
     room = new Room();
+    room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
     room.on(RoomEvent.Connected, handleConnected);
     room.on(RoomEvent.ParticipantConnected, handleParticipantConnected);
     room.on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
-    room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
 
     await room.connect(roomUrl, jwt);
-    await room.localParticipant.enableCameraAndMicrophone();
-    await room.localParticipant.publishTracks();
+    await publishTracks();
+  }
+  async function publishTracks() {
+    const videoTrack = await createLocalVideoTrack({
+      facingMode: "user",
+      // preset resolutions
+      resolution: VideoPresets.h216,
+    });
+    const audioTrack = await createLocalAudioTrack({
+      echoCancellation: true,
+      noiseSuppression: true,
+    });
+
+    await room.localParticipant.publishTrack(videoTrack);
+    await room.localParticipant.publishTrack(audioTrack);
   }
 
   function handleConnected() {
     console.log("Connected to room");
+    console.log(room);
   }
 
+  /**
+
+   * @param {RemoteParticipant} participant
+   */
   function handleParticipantConnected(participant) {
-    console.log(`Participant connected: ${participant.identity}`);
-    const remoteVideoElement = document.createElement("video");
-    remoteVideoElement.autoplay = true;
-    remoteVideoElement.muted = true;
-    remoteVideoElements = [...remoteVideoElements, remoteVideoElement];
-    participant.videoTracks.forEach((track) => {
-      handleTrackSubscribed(track, participant);
-    });
+    console.log(participant);
   }
 
+  /**
+   * @param {Participant} participant
+   */
   function handleParticipantDisconnected(participant) {
     console.log(`Participant disconnected: ${participant.identity}`);
-    remoteVideoElements = remoteVideoElements.filter(
-      (element) => element.participant !== participant
+    remoteParticipants = remoteParticipants.filter(
+      (element) => element.identity !== participant.identity
     );
   }
 
-  function handleTrackSubscribed(track, participant) {
+  /**
+   * @param {RemoteTrack} track
+   * @param {RemoteTrackPublication} publication
+   * @param {RemoteParticipant} participant
+   */
+  function handleTrackSubscribed(track, publication, participant) {
     console.log(`Track subscribed: ${track.sid}`);
-    const remoteVideoElement = remoteVideoElements.find(
-      (element) => element.participant === participant
-    );
-    track.attach(remoteVideoElement);
+    if (track.kind === Track.Kind.Video || track.kind === Track.Kind.Audio) {
+      const element = track.attach();
+      document.body.appendChild(element);
+    }
   }
 
   onMount(() => {
@@ -220,9 +135,16 @@
   </div>
 </main> -->
 <main>
-  <video bind:this={localVideoElement} autoplay muted />
-  {#each remoteVideoElements as remoteVideoElement (remoteVideoElement.participant.identity)}
-    <video bind:this={remoteVideoElement} />
+  <h1>Svelte LiveKit Example</h1>
+
+  <button on:click={publishTracks}>Publish Audio</button>
+
+  <h2>Remote Participants:</h2>
+
+  {#each remoteParticipants as participant}
+    <div>
+      <h3>{participant.identity}</h3>
+    </div>
   {/each}
 </main>
 
