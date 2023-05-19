@@ -191,12 +191,12 @@
     min-width: 100%;
     min-height: 100%;
   }
-  .videoContainer video {
+  #videoContainer video {
     position: absolute;
     width: 100%;
     max-height: 100vh;
   }
-  .videoContainer video.local-video {
+  #videoContainer video.local-video {
     position: absolute;
     right: 1;
     top: 1;
