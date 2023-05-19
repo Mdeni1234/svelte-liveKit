@@ -100,11 +100,9 @@
     if (track.kind === Track.Kind.Video) {
       const videoElement = document.createElement("video");
       videoElement.autoplay = true;
-      videoElement.style.position = "absolute";
-
-      videoElement.style.right = " 0";
       const localParticipantId = room.localParticipant.sid;
       if (participant.sid === localParticipantId) {
+        videoElement.style.position = "absolute";
         videoElement.style.top = " 0";
         videoElement.style.margin = "10px";
         videoElement.style.width = "200px";
@@ -113,8 +111,7 @@
       } else {
         videoElement.style.width = "100%";
         videoElement.style.maxHeight = "100vh";
-        videoElement.style.zIndex = "1";
-        videoElement.style.left = "0";
+        videoElement.style.padding = "10px";
       }
       track.attach(videoElement);
       // @ts-ignore
@@ -212,24 +209,8 @@
     justify-content: center;
     place-items: center;
     position: relative;
-    min-width: 100%;
-    min-height: 100%;
-  }
-  #videoContainer video {
-    position: absolute;
     width: 100%;
-    max-height: 100vh;
-    z-index: 1;
-    right: 0;
-    left: 0;
-  }
-  #videoContainer video.local-video {
-    position: absolute;
-    right: 0;
-    top: 0;
-    margin: 10px;
-    width: 200px;
-    z-index: 2;
-    height: auto;
+    min-width: 100vw;
+    min-height: 100%;
   }
 </style>
