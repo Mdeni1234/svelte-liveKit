@@ -130,6 +130,7 @@
 <style>
   #videoContainer {
     display: flex;
+    place-items: center;
     position: relative;
     min-width: 100vw;
     min-height: 100vh;
