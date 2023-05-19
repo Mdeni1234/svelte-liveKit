@@ -112,21 +112,9 @@
     if (track.kind === Track.Kind.Video) {
       const videoElement = document.createElement("video");
       videoElement.autoplay = true;
-      const localParticipantId = room.localParticipant.sid;
-      console.log(localParticipantId, participant.sid);
-      if (participant.sid == localParticipantId) {
-        videoElement.style.position = "absolute";
-        videoElement.style.top = "0";
-        videoElement.style.right = "0";
-        videoElement.style.margin = "10px";
-        videoElement.style.width = "200px";
-        videoElement.style.height = "auto";
-        videoElement.style.zIndex = "2";
-      } else {
-        videoElement.style.width = "100%";
-        videoElement.style.maxHeight = "85vh";
-        videoElement.style.padding = "10px";
-      }
+      videoElement.style.width = "100%";
+      videoElement.style.maxHeight = "85vh";
+      videoElement.style.padding = "10px";
       track.attach(videoElement);
       // @ts-ignore
       document.getElementById("videoContainer").appendChild(videoElement);
